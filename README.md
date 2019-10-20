@@ -12,11 +12,11 @@ Group of Aerospace Structures and Computational Mechanics
 Structure of this repository
 ---
 
-The course presentation is provided in::
+The course presentation is provided in "COBEM2019-modal-analysis-with-Python.pdf"
 
-  COBEM2019-modal-analysis-with-Python.pdf
+Course exercises are under folder "exercises"
 
-Course exercises are under folder 
+Derivations of finite element matrices are in "derive_finite_element_matrices"
 
 
 License

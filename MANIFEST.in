@@ -1,2 +1,0 @@
-recursive-include derive_finite_element_matrices *.py
-recursive-include exercises *.py
