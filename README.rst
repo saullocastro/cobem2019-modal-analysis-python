@@ -1,7 +1,7 @@
 Course: Modal Analysis with Python
 -----------------------------------
 
-Course given at COBEM 2019, Uberlandia, Brazil.
+Course given at COBEM 2019, Uberlândia, Brazil.
 
 Author::
 
@@ -14,7 +14,7 @@ Author::
 Citing this course
 ------------------
 
-Saullo G. P. Castro. "Modal Analysis with Python". COBEM 2019, Uberlandia,
+Saullo G. P. Castro. "Modal Analysis with Python". COBEM 2019, Uberlândia,
 Brazil. DOI:10.5281/zenodo.3514373_.
 
 .. _zenodo.3514373: https://zenodo.org/badge/latestdoi/216414105 
