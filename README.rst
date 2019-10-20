@@ -1,5 +1,5 @@
-Modal Analysis with Python
---------------------------
+Course: Modal Analysis with Python
+-----------------------------------
 
 Course given at COBEM 2019, Uberlandia, Brazil.
 
@@ -10,6 +10,17 @@ Author::
  Delft University of Technology
  Faculty of Aerospace Engineering
  Group of Aerospace Structures and Computational Mechanics
+
+Citing this course
+------------------
+
+Saullo G. P. Castro. "Modal Analysis with Python". COBEM 2019, Uberlandia,
+Brazil. DOI:10.5281/zenodo.3514373_.
+
+.. _zenodo.3514373: https://zenodo.org/badge/latestdoi/216414105 
+
+.. image:: https://zenodo.org/badge/216414105.svg
+   :target: https://zenodo.org/badge/latestdoi/216414105
 
 
 Structure of this repository
