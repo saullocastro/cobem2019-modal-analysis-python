@@ -4,6 +4,7 @@ Modal Analysis with Python
 Course given at COBEM 2019, Uberlandia, Brazil.
 
 Author::
+
  Saullo G. P. Castro
  Assistant Professor
  Delft University of Technology
