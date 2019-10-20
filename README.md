@@ -6,13 +6,9 @@ Course given at COBEM 2019, Uberlandia, Brazil
 Author:
 
 Saullo G. P. Castro
-
 Assistant Professor
-
 Delft University of Technology
-
 Faculty of Aerospace Engineering
-
 Group of Aerospace Structures and Computational Mechanics
 
 
