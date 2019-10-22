@@ -3,13 +3,12 @@ import numpy as np
 DOF = 2
 
 class Truss2D(object):
-    __slots__ = ['n1', 'n2', 'E', 'nu', 'A', 'le', 'rho']
+    __slots__ = ['n1', 'n2', 'E', 'A', 'le', 'rho']
     def __init__(self):
         self.n1 = None
         self.n2 = None
         # Material Lastrobe Lescalloy
         self.E = None
-        self.nu = None
         self.A = None
         self.le = None
         self.rho = None
@@ -42,7 +41,6 @@ def update_K_M(truss, nid_pos, ncoords, K, M, lumped=False):
     s = np.sin(theta)
     A = truss.A
     E = truss.E
-    nu = truss.nu
     truss.le = le
     rho = truss.rho
 

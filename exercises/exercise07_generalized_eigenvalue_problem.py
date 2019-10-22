@@ -25,7 +25,6 @@ A = 0.01**2
 
 # material properties
 E = 70e9
-nu = 0.3
 rho = 2.6e3
 
 # creating mesh
@@ -33,6 +32,7 @@ xtmp = np.linspace(0, a, nx)
 ytmp = np.linspace(0, b, ny)
 xmesh, ymesh = np.meshgrid(xtmp, ytmp)
 ncoords = np.vstack((xmesh.T.flatten(), ymesh.T.flatten())).T
+
 x = ncoords[:, 0]
 y = ncoords[:, 1]
 nid_pos = dict(zip(np.arange(len(ncoords)), np.arange(len(ncoords))))
@@ -72,7 +72,6 @@ for n1, n2 in nAnBs:
     elem.n2 = n2
     elem.E = E
     elem.A = A
-    elem.nu = nu
     elem.rho = rho
     update_K_M(elem, nid_pos, ncoords, K, M, lumped=lumped)
     elems.append(elem)
