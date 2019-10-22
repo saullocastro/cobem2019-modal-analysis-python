@@ -4,19 +4,18 @@ from numba import njit, jit
 DOF = 2
 
 class Truss2D(object):
-    __slots__ = ['n1', 'n2', 'E', 'nu', 'A', 'le', 'rho']
+    __slots__ = ['n1', 'n2', 'E', 'A', 'le', 'rho']
     def __init__(self):
         self.n1 = None
         self.n2 = None
         # Material Lastrobe Lescalloy
         self.E = None
-        self.nu = None
         self.A = None
         self.le = None
         self.rho = None
 
 @njit
-def update_K_M(i, A, E, nu, rho,
+def update_K_M(i, A, E, rho,
         pos1, pos2,
         ncoords, rowK, colK, valK, rowM, colM, valM,
         lumped=False):

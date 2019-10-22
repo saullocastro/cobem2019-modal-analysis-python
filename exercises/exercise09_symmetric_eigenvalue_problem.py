@@ -23,7 +23,6 @@ A = 0.01**2
 
 # material properties
 E = 70e9
-nu = 0.3
 rho = 2.6e3
 
 # creating mesh
@@ -59,7 +58,6 @@ for n1, n2 in nAnBs:
     elem.n2 = n2
     elem.E = E
     elem.A = A
-    elem.nu = nu
     elem.rho = rho
     update_K_M(elem, nid_pos, ncoords, K, M, lumped=lumped)
     elems.append(elem)

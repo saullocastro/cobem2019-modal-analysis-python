@@ -22,7 +22,6 @@ A = 0.01**2
 
 # material properties
 E = 70e9
-nu = 0.3
 rho = 2.6e3
 
 t0 = time.clock()
@@ -63,7 +62,6 @@ for n1, n2 in nAnBs:
     elem.n2 = n2
     elem.E = E
     elem.A = A
-    elem.nu = nu
     elem.rho = rho
     elems.append(elem)
 
@@ -76,7 +74,7 @@ rowM = np.zeros(4*len(elems))
 colM = np.zeros(4*len(elems))
 valM = np.zeros(4*len(elems))
 for i, elem in enumerate(elems):
-    update_K_M(i, elem.A, elem.E, elem.nu, elem.rho,
+    update_K_M(i, elem.A, elem.E, elem.rho,
             nid_pos[elem.n1], nid_pos[elem.n2],
             ncoords, rowK, colK, valK, rowM, colM, valM,
             lumped=lumped)
