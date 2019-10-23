@@ -60,7 +60,6 @@ for s in d.simplices:
 nAnBs = np.array([list(edge) for edge in edges.values()], dtype=int)
 
 #NOTE using dense matrices
-Kg = np.zeros((DOF*nx*ny, DOF*nx*ny))
 K = np.zeros((DOF*nx*ny, DOF*nx*ny))
 M = np.zeros((DOF*nx*ny, DOF*nx*ny))
 
