@@ -1,5 +1,8 @@
 import numpy as np
 
+#NOTE be careful when using the Beam2D with the Truss2D because currently the
+#     Truss2D is derived with only 2 DOFs per node, while the Beam2D is defined
+#     with 3 DOFs per node
 DOF = 2
 
 class Truss2D(object):
