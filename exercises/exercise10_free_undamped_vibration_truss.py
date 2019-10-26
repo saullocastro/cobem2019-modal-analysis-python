@@ -97,7 +97,7 @@ plt.title('perturbation')
 plt.plot(ncoords[:, 0], u0[1::DOF])
 plt.show()
 
-nmodes = 10
+nmodes = 50
 print('wn', wn[:nmodes])
 
 c1 = []
@@ -111,15 +111,16 @@ print('c2', c2)
 def ufunc(t):
     tmp = 0
     for I in range(nmodes):
-        tmp += (c1[I]*np.cos(wn[I]*t[:, None]) + c2[I]*np.sin(wn[I]*t[:, None]))*(Linv.T@V[:, I])
+        tmp += (c1[I]*np.cos(wn[I]*t[:, None]) +
+                c2[I]*np.sin(wn[I]*t[:, None]))*(Linv.T@V[:, I])
     return tmp
 
 # to plot
 num = 1000
 t = np.linspace(0, 3, num)
 uu = ufunc(t)
-u = np.zeros((t.shape[0], K.shape[0]))
-u[:, bu] = uu
+u_xt = np.zeros((t.shape[0], K.shape[0]))
+u_xt[:, bu] = uu
 
 plt.ion()
 fig, axes = plt.subplots(nrows=2, figsize=(10, 5))
@@ -127,13 +128,13 @@ for s in axes[0].spines.values():
     s.set_visible(False)
 axes[1].spines['right'].set_visible(False)
 axes[1].spines['top'].set_visible(False)
-axes[1].set_ylim(u[:, 1::DOF].min(), u[:, 1::DOF].max())
+axes[1].set_ylim(u_xt[:, 1::DOF].min(), u_xt[:, 1::DOF].max())
 
 data = []
 line = axes[1].plot([], [], '-')[0]
 line2 = axes[1].plot([], [], 'ro')[0]
 for i, ti in enumerate(t):
-    ui = u[i, :]
+    ui = u_xt[i, :]
     u1 = ui[0::DOF].reshape(nx, ny).T
     u2 = ui[1::DOF].reshape(nx, ny).T
 
@@ -188,7 +189,6 @@ xf = np.linspace(0.0, 2*np.pi*1.0/(2.0*dt), num//2)
 yf = 2/num*np.abs(uf[0:num//2])
 
 plt.xlabel('$rad/s$')
-plt.yscale('log')
 plt.plot(xf, yf)
 plt.xlim(0, wn[4]+50)
 plt.show()
