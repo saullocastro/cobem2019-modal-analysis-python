@@ -1,10 +1,5 @@
 # cover forced vibrations (slide 206)
 # study ressonance
-
-import sys
-sys.path.append(r'C:\Users\saullogiovanip\OneDrive\TU Delft\courses\Ae4ASM511 SAS-II\2019Q3\tudaesasII')
-import time
-
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -28,7 +23,9 @@ rho = 7.83e3 # kg/m3
 m_wheel = 20 # kg
 r_wheel = 0.3 # m
 m_airplane = 250 # kg
-I0 = 1/12*m_wheel*(2*r_wheel)**2
+
+I0_wheel = 1/12*m_wheel*(2*r_wheel)**2 # mass moment of inertia for wheel
+
 thetas = np.linspace(pi/2, 0, n)
 a = 2.4
 b = 1.2
@@ -78,12 +75,12 @@ for n1, n2 in zip(n1s, n2s):
 # adding effect of concentrated aircraft mass into M
 M[0, 0] += m_airplane/2 # u
 M[1, 1] += m_airplane/2 # v
-M[2, 2] += 0   # beta
+M[2, 2] += 0 # beta (no mass moment of inertia here)
 
 # adding effect of concentrated wheel mass into M
 M[-3, -3] += m_wheel # u
 M[-2, -2] += m_wheel # v
-M[-1, -1] += I0      # beta
+M[-1, -1] += I0_wheel # beta
 
 from scipy.linalg import cholesky
 from numpy.linalg import eigh
@@ -98,44 +95,44 @@ I = np.ones_like(M)
 # vtip = prescribed displacement
 # betatip = unknown
 known_ind = [0, 2, (K.shape[0]-1)-1]
-uuind = np.logical_not(np.in1d(np.arange(M.shape[0]), known_ind))
-ukind = np.in1d(np.arange(M.shape[0]), known_ind)
+bu = np.logical_not(np.in1d(np.arange(M.shape[0]), known_ind))
+bk = np.in1d(np.arange(M.shape[0]), known_ind)
 
-Muu = M[uuind, :][:, uuind]
-Mku = M[ukind, :][:, uuind]
-Muk = M[uuind, :][:, ukind]
-Mkk = M[ukind, :][:, ukind]
+Muu = M[bu, :][:, bu]
+Mku = M[bk, :][:, bu]
+Muk = M[bu, :][:, bk]
+Mkk = M[bk, :][:, bk]
 
-Kuu = K[uuind, :][:, uuind]
-Kku = K[ukind, :][:, uuind]
-Kuk = K[uuind, :][:, ukind]
-Kkk = K[ukind, :][:, ukind]
+Kuu = K[bu, :][:, bu]
+Kku = K[bk, :][:, bu]
+Kuk = K[bu, :][:, bk]
+Kkk = K[bk, :][:, bk]
 
 L = cholesky(Muu, lower=True)
 
 Linv = np.linalg.inv(L)
 Ktilde = dot(dot(Linv, Kuu), Linv.T)
 
-gamma, v = eigh(Ktilde) # already gives v[:, i] normalized to 1
+gamma, V = eigh(Ktilde) # already gives V[:, i] normalized to 1
 omegan = gamma**0.5
+
 print('Natural frequencies', omegan[:5])
 eigmodes = np.zeros((DOF*n, len(gamma)))
 for i in range(eigmodes.shape[1]):
-    eigmodes[uuind, i] = dot(Linv.T, v[:, i])
+    eigmodes[bu, i] = dot(Linv.T, V[:, i])
 
 for i in range(5):
     plt.clf()
     plt.title(r'$\omega_n = %1.2f\ Hz$' % omegan[i])
     plt.plot(x+eigmodes[0::DOF, i], y+eigmodes[1::DOF, i])
-    plt.savefig('exercise12_plot_eigenmode_%02d.png' % i, bbox_inches='tight')
+    plt.savefig('exercise15_plot_eigenmode_%02d.png' % i, bbox_inches='tight')
 
-q = v #ambiguous notation from slides, both are the same
-P = v
+nmodes = 10
 
-# decoupling the eigenvectors (modal analysis)
-S = dot(Linv.T, P)
-Pinv = P.T
-Sinv = dot(Pinv, L.T)
+P = V[:, :nmodes]
+
+# modal damping, using 2% for all modes
+zeta = np.array([0.02]*nmodes)[:, None]
 
 # creating function for vB(t)
 v0h = 20
@@ -172,8 +169,8 @@ d2vBt_dt2 = pi*a0*nbumps*(2.0*Lr*ac*np.cos(pi*nbumps*t*(ac*t + 2*v0h)/Lr) -
 g = -9.81 #m/s**2
 d2ualldt2 = np.zeros((DOF*n, len(t)))
 d2ualldt2[1::DOF] = g
-d2ukgdt2 = d2ualldt2[ukind]
-d2uugdt2 = d2ualldt2[uuind]
+d2ukgdt2 = d2ualldt2[bk]
+d2uugdt2 = d2ualldt2[bu]
 
 # acceleration vector of known dofs
 d2ukdt2 = np.zeros_like(d2ukgdt2)
@@ -189,52 +186,40 @@ f = fu - dot(Muk, d2ukdt2) - dot(Kuk, uk)
 # calculating modal forces
 fmodal = dot(P.T, dot(Linv, f))
 
-nmodes = S.shape[0]
-plt.clf()
-for nmodes in [5]:
-    deltat = np.diff(t)[0]
-    on = omegan[:nmodes, None]
+deltat = np.diff(t)[0]
+on = omegan[:nmodes, None]
+od = omegan[:nmodes, None]*np.sqrt(1 - zeta**2)
 
-    # particular solution
-    rp = np.zeros((nmodes, len(t)))
-    fm = fmodal[:nmodes, :]
+# particular solution
+rp = np.zeros((nmodes, len(t)))
 
-    # convolution loop
-    for i, tc in enumerate(t):
-        # undamped heaviside function
-        h = 1/on * np.heaviside(tc - t, 1)*np.sin(on*(tc - t))
-        rp[:, i] = np.sum(fm * deltat * h, axis=1)
+# convolution loop
+for i, tc in enumerate(t):
+    # damped heaviside function
+    h = 1/od*np.exp(-zeta*on*(tc - t))*np.heaviside(tc - t, 1)*np.sin(od*(tc - t))
+    h[np.isnan(h)] = 0
+    rp[:, i] = np.sum(fmodal * deltat * h, axis=1)
 
-    # homogeneous solution
-    u0 = np.zeros(DOF*n)
-    v0 = np.zeros(DOF*n)
-    v0[1::DOF] = -3 # m/s
-    v0[-2] = 0
-    r0dot = dot(Sinv, v0[uuind]) # initial modal velocities
-    a1 = r0dot/omegan
-    rh = a1[:nmodes, None]*np.sin(on*t)
+# homogeneous solution
+u0 = np.zeros(DOF*n)
+v0 = np.zeros(DOF*n)
+# initial velocity
+v0[1::DOF] = -3 # m/s
+v0[-2] = 0
+r0 = P.T @ L.T @ u0[bu]
+rdot0 = P.T @ L.T @ v0[bu]
+if np.any(r0 != 0):
+    phi = np.arctan(od*r0/(zeta*on*r0 + rdot0))
+else:
+    phi = 0
+A0 = np.sqrt(r0[:, None]**2 + (zeta*on/od*r0[:, None] + rdot0[:, None]/od)**2)
+rh = A0*np.exp(-zeta*on*t)*np.sin(od*t + phi)
 
-    # total solution
-    r = rh + rp
+# total solution
+r = rh + rp
 
-    u = np.zeros((DOF*n, len(t)))
-    u[uuind] = dot(S[:, :nmodes], r[:nmodes])
-
-    plt.plot(t, u[n//4*3+1], label=(r'$n_{modes} = %02d$' % nmodes))
-
-plt.legend()
-plt.savefig('exercise12_plot_convergence.png', bbox_inches='tight')
-
-plt.clf()
-uA = u[1, :]
-plt.plot(t, uA)
-plt.savefig('exercise12_plot_uA.png', bbox_inches='tight', size=(6, 6))
-
-plt.clf()
-tplot = t[1:]
-vA = np.diff(uA) / np.diff(t)
-plt.plot(tplot, vA)
-plt.savefig('exercise12_plot_vA.png', bbox_inches='tight', size=(6, 6))
+u = np.zeros((DOF*n, len(t)))
+u[bu] = Linv.T @ P @ r
 
 if create_animation:
     tplot = t[0::10]
@@ -256,5 +241,5 @@ if create_animation:
         lines[1].set_data(*[x+ui[:, 0], y+ui[:, 1]])
         return lines
     ani = FuncAnimation(fig, animate, range(len(tplot)))
-    ani.save('exercise12_plot_animation_reponse_undamped.html', fps=25)
+    ani.save('exercise15_plot_animation_reponse_damped.html', fps=25)
 
