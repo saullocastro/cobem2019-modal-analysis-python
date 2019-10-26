@@ -40,14 +40,18 @@ for leg_poly in [True]:
     Ke[:, :] = (2/le)*E*Izz*Nbetaxi.T*Nbetaxi + (2/le)*E*A*Nuxi.T*Nuxi
     Me[:, :] = (le/2)*rho*(A*Nu.T*Nu + A*Nv.T*Nv + Izz*Nbeta.T*Nbeta)
 
-    #TODO yet to be checked
-    Me_lumped = (le/2)*rho*Matrix([[A/2, 0, 0, 0, 0, 0],
-                                   [0, A/2, 0, 0, 0, 0],
-                                   [0, 0, Izz/2, 0, 0, 0],
-                                   [0, 0, 0, A/2, 0, 0],
-                                   [0, 0, 0, 0, A/2, 0],
-                                   [0, 0, 0, 0, 0, Izz/2]])
-
+    #NOTE procedure to compute lumped matrix when cross section changes
+    x = (xi + 1)*le/2
+    mA = sympy.integrate((le/2)*rho*A, (xi, -1, 0))
+    mB = sympy.integrate((le/2)*rho*A, (xi, 0, +1))
+    IzzA = sympy.integrate((le/2)*(Izz + x**2*rho*A), (xi, -1, 0))
+    IzzB = sympy.integrate((le/2)*(Izz + (le-x)**2*rho*A), (xi, 0, +1))
+    Me_lumped = Matrix([[mA, 0, 0, 0, 0, 0],
+                        [0, mA, 0, 0, 0, 0],
+                        [0, 0, IzzA, 0, 0, 0],
+                        [0, 0, 0, mB, 0, 0],
+                        [0, 0, 0, 0, mB, 0],
+                        [0, 0, 0, 0, 0, IzzB]])
 
     # integrating matrices in natural coordinates
 
@@ -57,6 +61,13 @@ for leg_poly in [True]:
     for ind, val in np.ndenumerate(Me):
         Me[ind] = sympy.simplify(sympy.integrate(val, (xi, -1, 1)))
 
+    Me_lumped = sympy.simplify(Me_lumped)
+
+    print('printing Me')
+    print(Me)
+    print('printing Me_lumped')
+    print(Me_lumped)
+
     K = sympy.simplify(R.T*Ke*R)
 
     if leg_poly:
@@ -64,16 +75,7 @@ for leg_poly in [True]:
     else:
         print('K integrated with Hermitian cubic polynomial')
 
-    print('printing for assignment report')
-    for ind, val in np.ndenumerate(Ke):
-        i, j = ind
-        if val == 0:
-            continue
-        print('K_e[%d, %d] =' % (i+1, j+1), end='')
-        sympy.print_latex(Ke[ind].subs('le', 'l_e'))
-        print(r'\\')
-
-    print('printing for code')
+    print('printing K for code')
     for ind, val in np.ndenumerate(K):
         i, j = ind
         si = 'c1' if i < 3 else 'c2'
@@ -88,17 +90,10 @@ for leg_poly in [True]:
     M = sympy.simplify(R.T*Me*R)
     M_lumped = sympy.simplify(R.T*Me_lumped*R)
 
-    print('printing for assignment report')
-    for ind, val in np.ndenumerate(Me):
-        i, j = ind
-        if val == 0:
-            continue
-        print('M_e[%d, %d] =' % (i+1, j+1), end='')
-        sympy.print_latex(Me[ind].subs('le', 'l_e'))
-        print(r'\\')
-
     print('printing M for code')
     for ind, val in np.ndenumerate(M):
+        if val == 0:
+            continue
         i, j = ind
         si = 'c1' if i < 3 else 'c2'
         sj = 'c1' if j < 3 else 'c2'
@@ -106,6 +101,8 @@ for leg_poly in [True]:
 
     print('printing M_lumped for code')
     for ind, val in np.ndenumerate(M_lumped):
+        if val == 0:
+            continue
         i, j = ind
         si = 'c1' if i < 3 else 'c2'
         sj = 'c1' if j < 3 else 'c2'
