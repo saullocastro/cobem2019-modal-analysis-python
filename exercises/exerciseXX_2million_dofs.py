@@ -12,7 +12,7 @@ DOF = 2
 lumped = True
 
 # number of nodes in each direction
-nx = 2000
+nx = 100
 ny = 500
 
 # geometry
@@ -25,6 +25,7 @@ E = 70e9
 rho = 2.6e3
 
 t0 = time.clock()
+print()
 print('Creating mesh')
 xtmp = np.linspace(0, a, nx)
 ytmp = np.linspace(0, b, ny)
@@ -33,6 +34,8 @@ ncoords = np.vstack((xmesh.T.flatten(), ymesh.T.flatten())).T
 x = ncoords[:, 0]
 y = ncoords[:, 1]
 nid_pos = dict(zip(np.arange(len(ncoords)), np.arange(len(ncoords))))
+
+print('    Number of DOFs:', len(ncoords)*2)
 
 # triangulation to establish nodal connectivity
 td = time.clock()
@@ -50,7 +53,6 @@ nAnBs = np.array([list(edge) for edge in edges.values()], dtype=int)
 print('done (%f s)' % (time.clock()-t0))
 
 N = DOF*nx*ny
-print('Number of degrees-of-freedom: %d' % N)
 
 t0 = time.clock()
 # creating truss elements
@@ -80,6 +82,7 @@ for i, elem in enumerate(elems):
             lumped=lumped)
 K = coo_matrix((valK, (rowK, colK)), shape=(N, N)).tocsc()
 M = coo_matrix((valM, (rowM, colM)), shape=(N, N)).tocsc()
+
 print('done (%f s)' % (time.clock()-t0))
 
 t0 = time.clock()
@@ -95,14 +98,14 @@ Kuu = K[bu, :][:, bu]
 Muu = M[bu, :][:, bu]
 print('done (%f s)' % (time.clock()-t0))
 
-p = 4
+nmodes = 4
 
 t0 = time.clock()
 print('Solving symmetric eigenvalue problem')
 L = Muu.sqrt()
 Linv = L.power(-1)
 Kuutilde = (Linv * Kuu) * Linv.T
-eigvals, V = eigsh(Kuutilde, k=p, which='LM', sigma=-1.)
+eigvals, V = eigsh(Kuutilde, k=nmodes, which='SM')
 wn = eigvals**0.5
 print(wn)
 print('done (%f s)' % (time.clock()-t0))
